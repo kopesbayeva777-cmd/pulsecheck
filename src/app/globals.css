@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .prose-ai p { @apply mb-3 leading-relaxed; }
+  .prose-ai h3 { @apply font-semibold text-slate-800 mt-4 mb-2; }
+  .prose-ai ul { @apply list-disc pl-5 mb-3 space-y-1; }
+  .prose-ai li { @apply text-slate-700; }
+}
