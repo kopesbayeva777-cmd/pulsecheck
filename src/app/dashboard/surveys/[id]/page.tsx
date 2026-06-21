@@ -75,23 +75,6 @@ export default async function SurveyAnalyticsPage({ params }: Props) {
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {hasData && (
-            <DownloadPDFButton
-              surveyTitle={survey.title}
-              responseCount={metrics.responseCount}
-              companyNPS={metrics.companyNPS}
-              managerNPS={metrics.managerNPS}
-              promotersPercent={metrics.promotersPercent}
-              passivesPercent={metrics.passivesPercent}
-              detractorsPercent={metrics.detractorsPercent}
-              engagement={metrics.engagement}
-              management={metrics.management}
-              growth={metrics.growth}
-              balance={metrics.balance}
-              motivation={metrics.motivation}
-              comments={metrics.comments}
-            />
-          )}
           <CopyLinkButton url={surveyUrl} />
           <ToggleActiveButton surveyId={survey.id} isActive={survey.is_active} />
         </div>
@@ -145,12 +128,26 @@ export default async function SurveyAnalyticsPage({ params }: Props) {
           </div>
 
           <div className="mb-8">
-            <AIReport surveyId={survey.id} />
+            <AIReport
+              surveyId={survey.id}
+              surveyTitle={survey.title}
+              responseCount={metrics.responseCount}
+              companyNPS={metrics.companyNPS}
+              managerNPS={metrics.managerNPS}
+              promotersPercent={metrics.promotersPercent}
+              passivesPercent={metrics.passivesPercent}
+              detractorsPercent={metrics.detractorsPercent}
+              engagement={metrics.engagement}
+              management={metrics.management}
+              growth={metrics.growth}
+              balance={metrics.balance}
+              motivation={metrics.motivation}
+              comments={metrics.comments}
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <AIAssistant surveyId={survey.id} />
-
             {metrics.comments.length > 0 && (
               <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-6">
                 <h3 className="font-semibold text-slate-700 mb-4">

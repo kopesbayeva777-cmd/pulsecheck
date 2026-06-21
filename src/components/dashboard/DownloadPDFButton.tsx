@@ -24,6 +24,7 @@ interface Props {
   balance: number
   motivation: Motivation
   comments: string[]
+  aiReport?: string
 }
 
 export default function DownloadPDFButton({
@@ -40,6 +41,7 @@ export default function DownloadPDFButton({
   balance,
   motivation,
   comments,
+  aiReport,
 }: Props) {
   function downloadPDF() {
     const date = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -48,11 +50,12 @@ export default function DownloadPDFButton({
     const commentsHtml =
       comments.length > 0
         ? `<h2>Комментарии сотрудников (${comments.length})</h2>
-           ${comments
-             .slice(0, 15)
-             .map(c => `<div class="comment">&laquo;${c}&raquo;</div>`)
-             .join('')}`
+           ${comments.slice(0, 15).map(c => `<div class="comment">&laquo;${c}&raquo;</div>`).join('')}`
         : ''
+
+    const aiReportHtml = aiReport
+      ? `<h2>AI-отчёт</h2><div class="ai-report">${aiReport.replace(/\n/g, '<br>')}</div>`
+      : ''
 
     const html = `<!DOCTYPE html>
 <html lang="ru">
@@ -83,6 +86,7 @@ export default function DownloadPDFButton({
   .motiv-bar { background: #6366f1; border-radius: 4px; height: 8px; }
   .motiv-val { width: 32px; text-align: right; font-size: 12px; font-weight: 600; color: #1e293b; }
   .comment { background: #f8fafc; border-left: 3px solid #6366f1; border-radius: 4px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; color: #475569; line-height: 1.5; }
+  .ai-report { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; font-size: 12px; color: #475569; line-height: 1.7; }
   .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 11px; text-align: center; }
   @media print { body { margin: 0; } }
 </style>
@@ -91,41 +95,17 @@ export default function DownloadPDFButton({
 <div class="header">
   <div class="logo">PulseCheck</div>
   <h1>${surveyTitle}</h1>
-  <div class="meta">Отчёт сформирован: ${date} &nbsp;·&nbsp; Количество ответов: ${responseCount}</div>
+  <div class="meta">Отчёт сформирован: ${date} · Количество ответов: ${responseCount}</div>
 </div>
 
 <h2>Ключевые показатели</h2>
 <div class="grid">
-  <div class="card">
-    <div class="card-label">eNPS компании</div>
-    <div class="card-value">${npsSign(companyNPS)}</div>
-    <div class="card-sub">бенчмарк: +20</div>
-  </div>
-  <div class="card">
-    <div class="card-label">eNPS руководителя</div>
-    <div class="card-value">${npsSign(managerNPS)}</div>
-    <div class="card-sub">бенчмарк: +30</div>
-  </div>
-  <div class="card">
-    <div class="card-label">Вовлечённость</div>
-    <div class="card-value">${engagement}<span style="font-size:14px;color:#94a3b8">/5</span></div>
-    <div class="card-sub">бенчмарк: 3.8</div>
-  </div>
-  <div class="card">
-    <div class="card-label">Руководство</div>
-    <div class="card-value">${management}<span style="font-size:14px;color:#94a3b8">/5</span></div>
-    <div class="card-sub">бенчмарк: 3.7</div>
-  </div>
-  <div class="card">
-    <div class="card-label">Развитие</div>
-    <div class="card-value">${growth}<span style="font-size:14px;color:#94a3b8">/5</span></div>
-    <div class="card-sub">бенчмарк: 3.5</div>
-  </div>
-  <div class="card">
-    <div class="card-label">Баланс</div>
-    <div class="card-value">${balance}<span style="font-size:14px;color:#94a3b8">/5</span></div>
-    <div class="card-sub">бенчмарк: 3.6</div>
-  </div>
+  <div class="card"><div class="card-label">eNPS компании</div><div class="card-value">${npsSign(companyNPS)}</div><div class="card-sub">бенчмарк: +20</div></div>
+  <div class="card"><div class="card-label">eNPS руководителя</div><div class="card-value">${npsSign(managerNPS)}</div><div class="card-sub">бенчмарк: +30</div></div>
+  <div class="card"><div class="card-label">Вовлечённость</div><div class="card-value">${engagement}<span style="font-size:14px;color:#94a3b8">/5</span></div><div class="card-sub">бенчмарк: 3.8</div></div>
+  <div class="card"><div class="card-label">Руководство</div><div class="card-value">${management}<span style="font-size:14px;color:#94a3b8">/5</span></div><div class="card-sub">бенчмарк: 3.7</div></div>
+  <div class="card"><div class="card-label">Развитие</div><div class="card-value">${growth}<span style="font-size:14px;color:#94a3b8">/5</span></div><div class="card-sub">бенчмарк: 3.5</div></div>
+  <div class="card"><div class="card-label">Баланс</div><div class="card-value">${balance}<span style="font-size:14px;color:#94a3b8">/5</span></div><div class="card-sub">бенчмарк: 3.6</div></div>
 </div>
 
 <h2>Распределение eNPS компании</h2>
@@ -143,28 +123,22 @@ ${[
   ['Стабильность', motivation.stability],
   ['Команда', motivation.team],
   ['Автономия', motivation.autonomy],
-]
-  .map(
-    ([label, val]) => `
+].map(([label, val]) => `
   <div class="motiv-row">
     <div class="motiv-label">${label}</div>
     <div class="motiv-bar-bg"><div class="motiv-bar" style="width:${((val as number) / 5) * 100}%"></div></div>
     <div class="motiv-val">${val}</div>
-  </div>`
-  )
-  .join('')}
+  </div>`).join('')}
 
+${aiReportHtml}
 ${commentsHtml}
 
-<div class="footer">Сгенерировано в PulseCheck &nbsp;·&nbsp; pulsecheck.app</div>
+<div class="footer">Сгенерировано в PulseCheck · pulsecheck-jade.vercel.app</div>
 </body>
 </html>`
 
     const win = window.open('', '_blank')
-    if (!win) {
-      alert('Разрешите всплывающие окна для скачивания PDF')
-      return
-    }
+    if (!win) { alert('Разрешите всплывающие окна для скачивания PDF'); return }
     win.document.write(html)
     win.document.close()
     win.focus()
