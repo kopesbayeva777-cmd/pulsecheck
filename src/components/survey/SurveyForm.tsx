@@ -1,5 +1,5 @@
-'use client'
-import { useState } from 'react'
+﻿'use client'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { QUESTIONS, BLOCKS, SCALE_LABELS } from '@/lib/questions'
@@ -20,6 +20,14 @@ export default function SurveyForm({ surveyId, surveyTitle }: Props) {
   const [answers, setAnswers] = useState<Answers>(initialAnswers)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [alreadyDone, setAlreadyDone] = useState(false)
+
+  useEffect(() => {
+    const key = `survey_completed_${surveyId}`
+    if (localStorage.getItem(key)) {
+      setAlreadyDone(true)
+    }
+  }, [surveyId])
 
   const blockGroups = Object.entries(BLOCKS).map(([key, label]) => ({
     key,
@@ -56,7 +64,20 @@ export default function SurveyForm({ surveyId, surveyTitle }: Props) {
       return
     }
 
+    localStorage.setItem(`survey_completed_${surveyId}`, Date.now().toString())
     router.push(`/survey/${surveyId}/thank-you`)
+  }
+
+  if (alreadyDone) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-10 text-center">
+          <div className="text-5xl mb-4">✅</div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Вы уже прошли этот опрос</h2>
+          <p className="text-slate-500 text-sm">Ваши ответы уже учтены. Спасибо за участие!</p>
+        </div>
+      </div>
+    )
   }
 
   return (
