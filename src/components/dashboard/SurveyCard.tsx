@@ -76,7 +76,7 @@ export default function SurveyCard({ survey, origin, responseCount }: Props) {
             className="flex items-center gap-1.5 bg-white border border-[#E8ECF0] text-slate-600 hover:bg-slate-50 text-sm px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap font-medium"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-            {copied ? 'Скопировано!' : 'Поделиться ссылкой'}
+            {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
           </button>
           <Link
             href={`/dashboard/surveys/${survey.id}`}
