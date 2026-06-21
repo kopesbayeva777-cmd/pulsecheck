@@ -1,14 +1,12 @@
-'use client'
+﻿'use client'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   PolarRadiusAxis, ResponsiveContainer, Tooltip,
 } from 'recharts'
 import type { Metrics } from '@/types'
-
 interface Props {
   motivation: Metrics['motivation']
 }
-
 export default function MotivationChart({ motivation }: Props) {
   const data = [
     { subject: 'Зарплата', value: motivation.salary },
@@ -18,11 +16,11 @@ export default function MotivationChart({ motivation }: Props) {
     { subject: 'Команда', value: motivation.team },
     { subject: 'Автономия', value: motivation.autonomy },
   ]
-
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
       <h3 className="font-semibold text-slate-700 mb-1">Мотивационный профиль</h3>
-      <p className="text-xs text-slate-400 mb-4">Что важно сотрудникам (средний балл 1–5)</p>
+      <p className="text-xs text-slate-400 mb-1">Что важно сотрудникам (средний балл 1–5)</p>
+      <p className="text-xs text-slate-300 mb-4">1 — менее важно · 5 — более важно</p>
       <ResponsiveContainer width="100%" height={240}>
         <RadarChart data={data}>
           <PolarGrid stroke="#e2e8f0" />
