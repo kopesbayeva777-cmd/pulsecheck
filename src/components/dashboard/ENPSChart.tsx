@@ -1,6 +1,5 @@
-'use client'
+﻿'use client'
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-
 interface Props {
   promoters: number
   passives: number
@@ -8,18 +7,13 @@ interface Props {
   nps: number
   title: string
 }
-
-const COLORS = ['#10b981', '#f59e0b', '#f43f5e']
-
 export default function ENPSChart({ promoters, passives, detractors, nps, title }: Props) {
   const data = [
-    { name: 'Промоутеры', value: promoters },
-    { name: 'Пассивные', value: passives },
-    { name: 'Критики', value: detractors },
+    { name: 'Промоутеры', value: promoters, color: '#10b981' },
+    { name: 'Пассивные', value: passives, color: '#f59e0b' },
+    { name: 'Критики', value: detractors, color: '#f43f5e' },
   ].filter(d => d.value > 0)
-
   const npsColor = nps >= 20 ? '#10b981' : nps >= 0 ? '#f59e0b' : '#f43f5e'
-
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
       <h3 className="font-semibold text-slate-700 mb-1">{title}</h3>
@@ -40,8 +34,8 @@ export default function ENPSChart({ promoters, passives, detractors, nps, title 
             paddingAngle={2}
             dataKey="value"
           >
-            {data.map((_, index) => (
-              <Cell key={index} fill={COLORS[index]} />
+            {data.map((entry, index) => (
+              <Cell key={index} fill={entry.color} />
             ))}
           </Pie>
           <Tooltip formatter={(value: number) => [`${value}%`, '']} />
