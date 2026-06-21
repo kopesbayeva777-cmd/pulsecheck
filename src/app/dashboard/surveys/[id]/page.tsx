@@ -75,6 +75,23 @@ export default async function SurveyAnalyticsPage({ params }: Props) {
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
+          {hasData && (
+            <DownloadPDFButton
+              surveyTitle={survey.title}
+              responseCount={metrics.responseCount}
+              companyNPS={metrics.companyNPS}
+              managerNPS={metrics.managerNPS}
+              promotersPercent={metrics.promotersPercent}
+              passivesPercent={metrics.passivesPercent}
+              detractorsPercent={metrics.detractorsPercent}
+              engagement={metrics.engagement}
+              management={metrics.management}
+              growth={metrics.growth}
+              balance={metrics.balance}
+              motivation={metrics.motivation}
+              comments={metrics.comments}
+            />
+          )}
           <CopyLinkButton url={surveyUrl} />
           <ToggleActiveButton surveyId={survey.id} isActive={survey.is_active} />
         </div>
