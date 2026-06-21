@@ -142,22 +142,28 @@ export default function SurveyForm({ surveyId, surveyTitle }: Props) {
                     )}
 
                     {q.type === 'scale' && (
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4, 5].map(val => (
-                          <button
-                            key={val}
-                            type="button"
-                            onClick={() => setAnswers(a => ({ ...a, [q.id]: val }))}
-                            title={SCALE_LABELS[val]}
-                            className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
-                              answers[q.id] === val
-                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
-                            }`}
-                          >
-                            {val}
-                          </button>
-                        ))}
+                      <div>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map(val => (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => setAnswers(a => ({ ...a, [q.id]: val }))}
+                              title={SCALE_LABELS[val]}
+                              className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
+                                answers[q.id] === val
+                                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                  : 'border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
+                              }`}
+                            >
+                              {val}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex justify-between mt-1 text-xs text-slate-400">
+                          <span>1 — не согласен</span>
+                          <span>5 — полностью согласен</span>
+                        </div>
                       </div>
                     )}
 
