@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import QRCode from 'react-qr-code'
-import { Users, Share2, QrCode, Check } from 'lucide-react'
+import { Users, Share2, QrCode, Check, Download } from 'lucide-react'
 
 interface Survey {
   id: string
@@ -28,6 +28,46 @@ export default function SurveyCard({ survey, origin, responseCount }: Props) {
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function downloadQR() {
+    const svg = document.getElementById(`qr-${survey.code}`)
+    if (!svg) return
+    const canvas = document.createElement('canvas')
+    const size = 400
+    canvas.width = size
+    canvas.height = size + 140
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const svgData = new XMLSerializer().serializeToString(svg)
+    const img = new Image()
+    img.onload = () => {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(img, 0, 0, size, size)
+
+      ctx.fillStyle = '#1e293b'
+      ctx.font = 'bold 18px Arial'
+      ctx.textAlign = 'center'
+      ctx.fillText('PulseCheck — анонимный опрос команды', size / 2, size + 30)
+
+      ctx.fillStyle = '#64748b'
+      ctx.font = '13px Arial'
+      ctx.fillText('Пройдите короткий опрос — это займёт 3–5 минут.', size / 2, size + 55)
+      ctx.fillText('Ваши ответы анонимны и помогут улучшить', size / 2, size + 75)
+      ctx.fillText('работу команды.', size / 2, size + 95)
+
+      ctx.fillStyle = '#6366f1'
+      ctx.font = '12px Arial'
+      ctx.fillText(surveyUrl, size / 2, size + 125)
+
+      const link = document.createElement('a')
+      link.download = `qr-опрос-${survey.code}.png`
+      link.href = canvas.toDataURL()
+      link.click()
+    }
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
   }
 
   return (
@@ -90,11 +130,18 @@ export default function SurveyCard({ survey, origin, responseCount }: Props) {
       {showQR && (
         <div className="mt-4 pt-4 border-t border-[#E8ECF0] flex items-start gap-6">
           <div className="p-3 bg-white border border-[#E8ECF0] rounded-xl inline-block">
-            <QRCode value={surveyUrl} size={140} />
+            <QRCode id={`qr-${survey.code}`} value={surveyUrl} size={140} />
           </div>
           <div className="text-sm text-slate-500 pt-1">
             <p className="font-medium text-slate-700 mb-1">QR-код для опроса</p>
-            <p className="text-xs leading-relaxed">Распечатайте или разместите этот QR-код, чтобы сотрудники могли легко пройти опрос с телефона.</p>
+            <p className="text-xs leading-relaxed mb-3">Распечатайте или разместите этот QR-код, чтобы сотрудники могли легко пройти опрос с телефона.</p>
+            <button
+              onClick={downloadQR}
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Скачать QR с описанием
+            </button>
           </div>
         </div>
       )}
