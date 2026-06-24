@@ -139,7 +139,7 @@ export default function NewSurveyPage() {
     }
 
     return (
-      <div className="max-w-2xl">
+      <div className="max-w-4xl">
         <div className="mb-8">
           <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 text-sm">
             ← Назад
@@ -147,34 +147,49 @@ export default function NewSurveyPage() {
           <h1 className="text-2xl font-bold text-slate-900 mt-2">Опрос создан!</h1>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-8 space-y-6">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="w-7 h-7 text-emerald-500 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-slate-900">{created.title}</p>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">Код: {created.code}</p>
+        {/* Скрытый QR для скачивания */}
+        <div style={{ position: 'absolute', left: -9999, top: -9999 }}>
+          <QRCode id="new-survey-qr" value={surveyUrl} size={400} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          {/* Left column */}
+          <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-8 space-y-6">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-7 h-7 text-emerald-500 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-900">{created.title}</p>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">Код: {created.code}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/dashboard/surveys/${created.id}`}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl text-sm text-center transition-colors"
+              >
+                Посмотреть результаты
+              </Link>
+              <Link
+                href="/dashboard"
+                className="w-full border border-[#E8ECF0] hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl text-sm text-center transition-colors"
+              >
+                На главную
+              </Link>
             </div>
           </div>
 
-          {/* Скрытый QR для скачивания */}
-          <div style={{ position: 'absolute', left: -9999, top: -9999 }}>
-            <QRCode id="new-survey-qr" value={surveyUrl} size={400} />
-          </div>
-
-          {/* Инструкция */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3 text-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-              <span className="font-semibold text-slate-900">Опрос готов к запуску!</span>
-            </div>
+          {/* Right column — instruction */}
+          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 space-y-4 text-sm">
+            <p className="font-semibold text-slate-900">Опрос готов к запуску!</p>
 
             <div>
               <p className="font-medium text-slate-800 mb-1">Как поделиться с сотрудниками:</p>
-              <ul className="text-slate-600 space-y-1 text-xs">
+              <ul className="text-slate-600 space-y-1 text-xs mb-3">
                 <li>• Отправьте ссылку через мессенджер — кнопка «Поделиться ссылкой»</li>
                 <li>• Или распечатайте QR-код — кнопка «Скачать QR с описанием»</li>
               </ul>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <button
                   onClick={copyLink}
                   style={BTN}
@@ -211,28 +226,13 @@ export default function NewSurveyPage() {
               </ul>
             </div>
           </div>
-
-          <div className="flex gap-3 pt-2">
-            <Link
-              href={`/dashboard/surveys/${created.id}`}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl text-sm text-center transition-colors"
-            >
-              Посмотреть результаты
-            </Link>
-            <Link
-              href="/dashboard"
-              className="flex-1 border border-[#E8ECF0] hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl text-sm text-center transition-colors"
-            >
-              На главную
-            </Link>
-          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-2xl">
       <div className="mb-8">
         <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 text-sm">
           ← Назад
@@ -242,49 +242,51 @@ export default function NewSurveyPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Название опроса
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Пульс-опрос Q2 2025"
-              required
-              autoFocus
-              className="w-full border border-[#E8ECF0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-            />
-            <p className="text-xs text-slate-400 mt-1.5">Сотрудники увидят это название в начале опроса</p>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Название опроса
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Пульс-опрос Q2 2025"
+                required
+                autoFocus
+                className="w-full border border-[#E8ECF0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+              />
+              <p className="text-xs text-slate-400 mt-1.5">Сотрудники увидят это название в начале опроса</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Отрасль <span className="text-slate-400 font-normal">(необязательно)</span>
+              </label>
+              <select
+                value={industry}
+                onChange={e => setIndustry(e.target.value)}
+                className="w-full border border-[#E8ECF0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-slate-700"
+              >
+                <option value="">Выберите отрасль...</option>
+                {INDUSTRIES.map(ind => (
+                  <option key={ind} value={ind}>{ind}</option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-400 mt-1.5">Помогает сравнивать с отраслевыми бенчмарками</p>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Отрасль <span className="text-slate-400 font-normal">(необязательно)</span>
-            </label>
-            <select
-              value={industry}
-              onChange={e => setIndustry(e.target.value)}
-              className="w-full border border-[#E8ECF0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-slate-700"
-            >
-              <option value="">Выберите отрасль...</option>
-              {INDUSTRIES.map(ind => (
-                <option key={ind} value={ind}>{ind}</option>
-              ))}
-            </select>
-            <p className="text-xs text-slate-400 mt-1.5">Помогает сравнивать результаты с отраслевыми бенчмарками</p>
-          </div>
-
-          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-sm text-indigo-800">
-            <div className="flex items-center gap-2 font-medium mb-2">
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-sm text-indigo-800">
+            <div className="flex items-center gap-2 font-medium mb-1.5">
               <ClipboardList className="w-4 h-4" />
               В опрос включено 20 вопросов:
             </div>
-            <ul className="space-y-1 text-indigo-700 text-xs">
-              <li>• eNPS компании и руководителя (шкала 0–10)</li>
-              <li>• Вовлечённость, Руководство, Развитие, Баланс (шкала 1–5)</li>
-              <li>• Мотивационный профиль (шкала 1–5)</li>
+            <ul className="text-indigo-700 text-xs flex flex-wrap gap-x-4 gap-y-0.5">
+              <li>• eNPS компании и руководителя (0–10)</li>
+              <li>• Вовлечённость, Руководство, Развитие, Баланс (1–5)</li>
+              <li>• Мотивационный профиль (1–5)</li>
               <li>• Открытый вопрос для комментариев</li>
             </ul>
           </div>
