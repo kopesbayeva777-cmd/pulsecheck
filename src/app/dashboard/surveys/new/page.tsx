@@ -153,62 +153,22 @@ export default function NewSurveyPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          {/* Left column */}
-          <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-8 space-y-6">
+          {/* Left column — title + instruction text */}
+          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 space-y-4 text-sm">
             <div className="flex items-center gap-3">
-              <CheckCircle className="w-7 h-7 text-emerald-500 flex-shrink-0" />
+              <CheckCircle className="w-6 h-6 text-emerald-500 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-slate-900">{created.title}</p>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">Код: {created.code}</p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <Link
-                href={`/dashboard/surveys/${created.id}`}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl text-sm text-center transition-colors"
-              >
-                Посмотреть результаты
-              </Link>
-              <Link
-                href="/dashboard"
-                className="w-full border border-[#E8ECF0] hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl text-sm text-center transition-colors"
-              >
-                На главную
-              </Link>
-            </div>
-          </div>
-
-          {/* Right column — instruction */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 space-y-4 text-sm">
-            <p className="font-semibold text-slate-900">Опрос готов к запуску!</p>
-
             <div>
               <p className="font-medium text-slate-800 mb-1">Как поделиться с сотрудниками:</p>
-              <ul className="text-slate-600 space-y-1 text-xs mb-3">
+              <ul className="text-slate-600 space-y-1 text-xs">
                 <li>• Отправьте ссылку через мессенджер — кнопка «Поделиться ссылкой»</li>
                 <li>• Или распечатайте QR-код — кнопка «Скачать QR с описанием»</li>
               </ul>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button
-                  onClick={copyLink}
-                  style={BTN}
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
-                >
-                  {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
-                  {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
-                </button>
-                <button
-                  onClick={downloadQR}
-                  style={BTN}
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
-                >
-                  <Download size={14} />
-                  Скачать QR с описанием
-                </button>
-              </div>
             </div>
 
             <div>
@@ -225,6 +185,40 @@ export default function NewSurveyPage() {
                 <li>• Система ограничивает одно прохождение опроса с одного устройства раз в 24 часа</li>
               </ul>
             </div>
+          </div>
+
+          {/* Right column — all buttons */}
+          <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-8 flex flex-col gap-3 justify-center">
+            <button
+              onClick={copyLink}
+              style={{ ...BTN, width: '100%', justifyContent: 'center', padding: '12px 18px' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
+            >
+              {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
+              {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
+            </button>
+            <button
+              onClick={downloadQR}
+              style={{ ...BTN, width: '100%', justifyContent: 'center', padding: '12px 18px' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
+            >
+              <Download size={14} />
+              Скачать QR с описанием
+            </button>
+            <Link
+              href={`/dashboard/surveys/${created.id}`}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl text-sm text-center transition-colors"
+            >
+              Посмотреть результаты
+            </Link>
+            <Link
+              href="/dashboard"
+              className="w-full border border-[#E8ECF0] hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl text-sm text-center transition-colors"
+            >
+              На главную
+            </Link>
           </div>
         </div>
       </div>
@@ -283,12 +277,9 @@ export default function NewSurveyPage() {
               <ClipboardList className="w-4 h-4" />
               В опрос включено 20 вопросов:
             </div>
-            <ul className="text-indigo-700 text-xs flex flex-wrap gap-x-4 gap-y-0.5">
-              <li>• eNPS компании и руководителя (0–10)</li>
-              <li>• Вовлечённость, Руководство, Развитие, Баланс (1–5)</li>
-              <li>• Мотивационный профиль (1–5)</li>
-              <li>• Открытый вопрос для комментариев</li>
-            </ul>
+            <p className="text-xs text-indigo-700">
+              eNPS компании и руководителя (0–10) · Вовлечённость, Руководство, Развитие, Баланс (1–5) · Мотивационный профиль (1–5) · Открытый вопрос для комментариев
+            </p>
           </div>
 
           {error && <p className="text-rose-600 text-sm bg-rose-50 border border-rose-100 px-3 py-2.5 rounded-xl">{error}</p>}
