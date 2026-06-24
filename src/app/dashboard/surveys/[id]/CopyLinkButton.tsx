@@ -29,7 +29,7 @@ export default function CopyLinkButton({ url }: { url: string }) {
       onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
     >
       {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
-      {copied ? 'Скопировано!' : 'Поделиться ссылкой'}
+      {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
     </button>
   )
 }
