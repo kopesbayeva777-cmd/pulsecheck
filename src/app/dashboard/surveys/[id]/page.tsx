@@ -11,6 +11,7 @@ import Link from 'next/link'
 import type { SurveyResponse } from '@/types'
 import CopyLinkButton from './CopyLinkButton'
 import ToggleActiveButton from './ToggleActiveButton'
+import DeleteSurveyButton from './DeleteSurveyButton'
 import DownloadPDFButton from '@/components/dashboard/DownloadPDFButton'
 import { Users, ClipboardList } from 'lucide-react'
 
@@ -51,30 +52,55 @@ export default async function SurveyAnalyticsPage({ params }: Props) {
     { label: 'Баланс', value: metrics.balance, unit: '/5', color: getScoreColor(metrics.balance, BENCHMARKS.balance), bg: getScoreBg(metrics.balance, BENCHMARKS.balance) },
   ]
 
+  // Map Tailwind color class → pastel hex + badge label
+  const scoreStyle = (colorClass: string): { hex: string; badge: string; badgeBg: string; badgeColor: string } => {
+    if (colorClass.includes('emerald')) return { hex: '#34D399', badge: '▲ Хорошо',   badgeBg: 'rgba(52,211,153,0.12)',  badgeColor: '#059669' }
+    if (colorClass.includes('amber'))   return { hex: '#FBBF24', badge: '→ Норма',    badgeBg: 'rgba(251,191,36,0.12)',  badgeColor: '#B45309' }
+    if (colorClass.includes('rose'))    return { hex: '#F87171', badge: '▼ Критично', badgeBg: 'rgba(248,113,113,0.12)', badgeColor: '#B91C1C' }
+    return { hex: '#111827', badge: '', badgeBg: '', badgeColor: '' }
+  }
+
+  const glass: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.7)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255,255,255,0.85)',
+    borderRadius: 20,
+    boxShadow: '0 4px 24px rgba(100,80,200,0.07)',
+  }
+
   return (
     <div>
-      <div className="flex items-start justify-between mb-8">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 text-sm">
+          <Link href="/dashboard" style={{ fontSize: 13, color: '#9CA3AF', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             ← Мои опросы
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 mt-1">{survey.title}</h1>
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              survey.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-            }`}>
-              {survey.is_active ? 'Активен' : 'Закрыт'}
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', letterSpacing: '-0.025em', marginTop: 6, marginBottom: 10 }}>
+            {survey.title}
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 20,
+              ...(survey.is_active
+                ? { background: 'rgba(52,211,153,0.13)', color: '#059669' }
+                : { background: 'rgba(107,114,128,0.1)', color: '#6B7280' }),
+            }}>
+              {survey.is_active ? '● Активен' : '○ Закрыт'}
             </span>
             {hasData && (
-              <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-sm font-semibold px-3 py-1 rounded-full">
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#5B5BD6', background: 'rgba(91,91,214,0.1)', padding: '3px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                 <Users className="w-3.5 h-3.5" />
                 {metrics.responseCount} сотрудников прошли опрос
               </span>
             )}
-            <span className="text-slate-400 text-sm font-mono">{surveyUrl}</span>
+            <span style={{ fontSize: 12, color: '#D1D5DB', fontFamily: 'monospace' }}>{surveyUrl}</span>
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <CopyLinkButton url={surveyUrl} />
+          <ToggleActiveButton surveyId={survey.id} isActive={survey.is_active} />
           {hasData && (
             <DownloadPDFButton
               surveyTitle={survey.title}
@@ -92,31 +118,43 @@ export default async function SurveyAnalyticsPage({ params }: Props) {
               comments={metrics.comments}
             />
           )}
-          <CopyLinkButton url={surveyUrl} />
-          <ToggleActiveButton surveyId={survey.id} isActive={survey.is_active} />
+          <DeleteSurveyButton surveyId={survey.id} />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8 lg:grid-cols-6">
-        {statCards.map(card => (
-          <div key={card.label} className={`rounded-2xl border p-5 shadow-sm ${card.bg}`}>
-            <p className="text-xs text-slate-500 font-medium mb-2">{card.label}</p>
-            <p className={`text-3xl font-black leading-none ${card.color}`}>
-              {hasData ? card.value : '—'}
-              {hasData && card.unit && <span className="text-base font-normal ml-0.5">{card.unit}</span>}
-            </p>
-          </div>
-        ))}
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14, marginBottom: 28 }}>
+        {statCards.map((card, i) => {
+          const { hex, badge, badgeBg, badgeColor } = scoreStyle(card.color)
+          return (
+            <div key={card.label} style={{ ...glass, padding: '20px 18px 18px' }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+                {card.label}
+              </p>
+              <p style={{ fontSize: 32, fontWeight: 800, color: hex, letterSpacing: '-0.03em', lineHeight: 1 }}>
+                {hasData ? card.value : '—'}
+                {hasData && card.unit && <span style={{ fontSize: 15, fontWeight: 400, color: '#9CA3AF', marginLeft: 2 }}>{card.unit}</span>}
+              </p>
+              {hasData && badge && (
+                <span style={{ display: 'inline-block', marginTop: 10, fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 20, background: badgeBg, color: badgeColor }}>
+                  {badge}
+                </span>
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {!hasData && (
-        <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-12 text-center mb-8">
-          <div className="flex justify-center mb-3">
-            <ClipboardList className="w-10 h-10 text-slate-300" />
+        <div style={{ ...glass, padding: '48px 24px', textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(91,91,214,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ClipboardList style={{ width: 24, height: 24, color: '#5B5BD6' }} />
+            </div>
           </div>
-          <h2 className="text-lg font-semibold text-slate-700 mb-2">Ждём первые ответы</h2>
-          <p className="text-slate-400 text-sm mb-4">Поделитесь ссылкой с сотрудниками, чтобы начать сбор данных</p>
-          <code className="text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg text-sm font-mono">{surveyUrl}</code>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Ждём первые ответы</h2>
+          <p style={{ fontSize: 14, color: '#9CA3AF', marginBottom: 16 }}>Поделитесь ссылкой с сотрудниками, чтобы начать сбор данных</p>
+          <code style={{ fontSize: 13, color: '#5B5BD6', background: 'rgba(91,91,214,0.08)', padding: '6px 14px', borderRadius: 10, fontFamily: 'monospace' }}>{surveyUrl}</code>
         </div>
       )}
 

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -50,7 +51,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+      <motion.div
+        className="w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+      >
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-2xl mb-4 shadow-md">
             <span className="text-white font-bold text-xl">P</span>
@@ -154,7 +160,7 @@ export default function LoginPage() {
             )}
           </form>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

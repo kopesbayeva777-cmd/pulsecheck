@@ -1,13 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import SurveyCard from '@/components/dashboard/SurveyCard'
+import AnimatedCardList from '@/components/dashboard/AnimatedCardList'
+import DashboardHero from '@/components/dashboard/DashboardHero'
 import { ClipboardList, Shield, BarChart2, Download } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_name')
+    .eq('id', user.id)
+    .single()
 
   const { data: surveys } = await supabase
     .from('surveys')
@@ -17,64 +24,100 @@ export default async function DashboardPage() {
 
   const surveyIds = surveys?.map(s => s.id) ?? []
   let countMap: Record<string, number> = {}
+  let avgEnps: number | null = null
 
   if (surveyIds.length > 0) {
-    const { data: responseCounts } = await supabase
+    const { data: allResponses } = await supabase
       .from('responses')
-      .select('survey_id')
+      .select('survey_id, q1')
       .in('survey_id', surveyIds)
 
-    countMap = (responseCounts ?? []).reduce((acc: Record<string, number>, r: { survey_id: string }) => {
-      acc[r.survey_id] = (acc[r.survey_id] || 0) + 1
-      return acc
-    }, {})
+    const responsesBySurvey: Record<string, number[]> = {}
+    for (const r of allResponses ?? []) {
+      if (!responsesBySurvey[r.survey_id]) responsesBySurvey[r.survey_id] = []
+      responsesBySurvey[r.survey_id].push(r.q1)
+      countMap[r.survey_id] = (countMap[r.survey_id] || 0) + 1
+    }
+
+    const npsValues = Object.values(responsesBySurvey).map(q1s => {
+      const promoters  = q1s.filter(s => s >= 9).length
+      const detractors = q1s.filter(s => s <= 6).length
+      return Math.round(((promoters - detractors) / q1s.length) * 100)
+    })
+    if (npsValues.length > 0) {
+      avgEnps = Math.round(npsValues.reduce((a, b) => a + b, 0) / npsValues.length)
+    }
   }
+
+  const activeSurveys = (surveys ?? []).filter(s => s.is_active).length
+  const totalResponses = Object.values(countMap).reduce((a, b) => a + b, 0)
+  const lastSurveyDate = surveys?.[0]?.created_at ?? null
 
   const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-10">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Мои опросы</h1>
-          <p className="text-slate-500 text-sm mt-1">Управляйте опросами и смотрите результаты</p>
-        </div>
+      <DashboardHero
+        companyName={profile?.company_name ?? null}
+        activeSurveys={activeSurveys}
+        totalResponses={totalResponses}
+        lastSurveyDate={lastSurveyDate}
+        avgEnps={avgEnps}
+      />
+
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-base font-semibold" style={{ color: '#1A1A2E' }}>Мои опросы</h2>
         <Link
           href="/dashboard/surveys/new"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: 13, fontWeight: 600, color: '#5B5BD6', textDecoration: 'none',
+            padding: '8px 20px', borderRadius: 100,
+            background: 'rgba(255,255,255,0.7)',
+            border: '1px solid rgba(91,91,214,0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}
         >
           + Новый опрос
         </Link>
       </div>
 
       {!surveys || surveys.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-16 text-center">
+        <div
+          className="p-16 text-center"
+          style={{
+            background: '#FFFFFF',
+            borderRadius: '20px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+            border: '1px solid #ECECF3',
+          }}
+        >
           <div className="flex justify-center mb-4">
-            <ClipboardList className="w-12 h-12 text-slate-300" />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: '#F0F0FD' }}>
+              <ClipboardList className="w-7 h-7" style={{ color: '#5B5BD6' }} />
+            </div>
           </div>
-          <h2 className="text-lg font-semibold text-slate-700 mb-2">Пока нет опросов</h2>
-          <p className="text-slate-400 text-sm mb-6">Создайте первый опрос и поделитесь ссылкой с командой</p>
+          <h2 className="text-base font-semibold mb-2" style={{ color: '#1A1A2E' }}>Пока нет опросов</h2>
+          <p className="text-sm mb-6" style={{ color: '#9999BB' }}>Создайте первый опрос и поделитесь ссылкой с командой</p>
           <Link
             href="/dashboard/surveys/new"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors inline-block"
+            style={{
+              display: 'inline-flex', alignItems: 'center',
+              fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none',
+              padding: '10px 24px', borderRadius: 100,
+              background: 'linear-gradient(135deg, #5B5BD6, #7C4DDB)',
+              boxShadow: '0 4px 20px rgba(91,91,214,0.35)',
+            }}
           >
             Создать опрос
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {surveys.map(survey => (
-            <SurveyCard
-              key={survey.id}
-              survey={survey}
-              origin={origin}
-              responseCount={countMap[survey.id] ?? 0}
-            />
-          ))}
-        </div>
+        <AnimatedCardList surveys={surveys} origin={origin} countMap={countMap} />
       )}
 
-      <div className="mt-12 bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-8">
+      <div className="mt-12 bg-white rounded-2xl border border-[#ECECF3] p-8">
         <h2 className="text-base font-bold text-slate-800 mb-6">Как работает PulseCheck</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="flex flex-col items-start gap-3">
@@ -136,7 +179,7 @@ export default async function DashboardPage() {
       <div className="mt-8 space-y-6">
 
         {/* eNPS explainer */}
-        <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#ECECF3] overflow-hidden">
           <div className="flex items-center gap-3 px-6 py-4 border-b border-[#E8ECF0]" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)' }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style={{ background: '#534AB7' }}>
               eN
@@ -212,7 +255,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {/* Motivation profile */}
-          <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#ECECF3] overflow-hidden">
             <div className="flex items-center gap-3 px-6 py-4 border-b border-[#E8ECF0]" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)' }}>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: '#534AB7' }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +290,7 @@ export default async function DashboardPage() {
           <div className="space-y-6">
 
             {/* Frequency */}
-            <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-[#ECECF3] overflow-hidden">
               <div className="flex items-center gap-3 px-6 py-4 border-b border-[#E8ECF0]" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)' }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: '#534AB7' }}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +317,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* How to work with results */}
-            <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-[#ECECF3] overflow-hidden">
               <div className="flex items-center gap-3 px-6 py-4 border-b border-[#E8ECF0]" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)' }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: '#534AB7' }}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

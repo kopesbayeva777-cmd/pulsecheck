@@ -8,6 +8,15 @@ interface Props {
   isActive: boolean
 }
 
+const BTN: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 100, cursor: 'pointer',
+  background: 'rgba(255,255,255,0.7)',
+  border: '1px solid rgba(0,0,0,0.08)',
+  color: '#111827',
+  transition: 'background 0.15s',
+}
+
 export default function ToggleActiveButton({ surveyId, isActive }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -24,11 +33,9 @@ export default function ToggleActiveButton({ surveyId, isActive }: Props) {
     <button
       onClick={toggle}
       disabled={loading}
-      className={`text-sm font-medium px-4 py-2 rounded-xl transition-colors disabled:opacity-50 ${
-        isActive
-          ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-          : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700'
-      }`}
+      style={{ ...BTN, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+      onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)' }}
+      onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)' }}
     >
       {loading ? '...' : isActive ? 'Закрыть опрос' : 'Открыть опрос'}
     </button>

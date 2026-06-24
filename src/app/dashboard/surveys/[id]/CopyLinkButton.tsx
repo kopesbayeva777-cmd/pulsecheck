@@ -2,6 +2,15 @@
 import { useState } from 'react'
 import { Share2, Check } from 'lucide-react'
 
+const BTN: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 100, cursor: 'pointer',
+  background: 'rgba(255,255,255,0.7)',
+  border: '1px solid rgba(0,0,0,0.08)',
+  color: '#111827',
+  transition: 'background 0.15s',
+}
+
 export default function CopyLinkButton({ url }: { url: string }) {
   const [copied, setCopied] = useState(false)
 
@@ -15,10 +24,12 @@ export default function CopyLinkButton({ url }: { url: string }) {
   return (
     <button
       onClick={copy}
-      className="flex items-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+      style={BTN}
+      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
     >
-      {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
-      {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
+      {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
+      {copied ? 'Скопировано!' : 'Поделиться ссылкой'}
     </button>
   )
 }

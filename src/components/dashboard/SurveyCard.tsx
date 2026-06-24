@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import QRCode from 'react-qr-code'
-import { Users, Share2, QrCode, Check, Download } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Users, Share2, QrCode, Check, Download, ArrowRight } from 'lucide-react'
 
 interface Survey {
   id: string
@@ -39,29 +40,20 @@ export default function SurveyCard({ survey, origin, responseCount }: Props) {
     canvas.height = size + 140
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-
     const svgData = new XMLSerializer().serializeToString(svg)
     const img = new Image()
     img.onload = () => {
       ctx.fillStyle = '#ffffff'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(img, 0, 0, size, size)
-
-      ctx.fillStyle = '#1e293b'
-      ctx.font = 'bold 18px Arial'
-      ctx.textAlign = 'center'
+      ctx.fillStyle = '#111827'; ctx.font = 'bold 18px Inter, Arial'; ctx.textAlign = 'center'
       ctx.fillText('PulseCheck — анонимный опрос команды', size / 2, size + 30)
-
-      ctx.fillStyle = '#64748b'
-      ctx.font = '13px Arial'
+      ctx.fillStyle = '#6B7280'; ctx.font = '13px Inter, Arial'
       ctx.fillText('Пройдите короткий опрос — это займёт 3–5 минут.', size / 2, size + 55)
       ctx.fillText('Ваши ответы анонимны и помогут улучшить', size / 2, size + 75)
       ctx.fillText('работу команды.', size / 2, size + 95)
-
-      ctx.fillStyle = '#6366f1'
-      ctx.font = '12px Arial'
+      ctx.fillStyle = '#5B5BD6'; ctx.font = '12px Inter, Arial'
       ctx.fillText(surveyUrl, size / 2, size + 125)
-
       const link = document.createElement('a')
       link.download = `qr-опрос-${survey.code}.png`
       link.href = canvas.toDataURL()
@@ -71,80 +63,169 @@ export default function SurveyCard({ survey, origin, responseCount }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E8ECF0] shadow-sm p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="font-semibold text-slate-900">{survey.title}</h2>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
-              survey.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-            }`}>
-              {survey.is_active ? 'Активен' : 'Закрыт'}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        y: -3,
+        background: 'rgba(255,255,255,0.9)',
+        boxShadow: '0 16px 48px rgba(100,80,200,0.14)',
+        transition: { duration: 0.2 },
+      }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      style={{
+        background: 'rgba(255,255,255,0.7)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,0.8)',
+        borderRadius: 24,
+        padding: '24px 26px',
+        boxShadow: '0 8px 32px rgba(100,80,200,0.08)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
+
+        {/* ── Left ── */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Title + badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, color: '#111827', margin: 0, lineHeight: 1.3 }}>
+              {survey.title}
+            </h2>
+            <span style={{
+              fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 20,
+              ...(survey.is_active
+                ? { background: 'rgba(5,150,105,0.12)', color: '#059669' }
+                : { background: 'rgba(107,114,128,0.1)', color: '#6B7280' }),
+            }}>
+              {survey.is_active ? '● Активен' : '○ Закрыт'}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-sm font-semibold px-3 py-1 rounded-full">
-              <Users className="w-3.5 h-3.5" />
-              {responseCount} сотрудников прошли опрос
+          {/* Meta */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              fontSize: 13, fontWeight: 500,
+              background: 'rgba(91,91,214,0.1)', color: '#5B5BD6',
+              padding: '3px 10px', borderRadius: 20,
+            }}>
+              <Users size={13} />
+              {responseCount} ответов
             </span>
-            <span className="text-slate-400 text-xs">
-              Код: <span className="font-mono font-medium text-slate-600">{survey.code}</span>
-              {' · '}
-              {new Date(survey.created_at).toLocaleDateString('ru-RU')}
+            <span style={{ fontSize: 12, color: '#9CA3AF' }}>
+              {new Date(survey.created_at).toLocaleDateString('ru-RU', {
+                day: 'numeric', month: 'long', year: 'numeric',
+              })}
+            </span>
+            <span style={{ fontSize: 11, color: '#D1D5DB', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
+              {surveyUrl}
             </span>
           </div>
-
-          <p className="text-xs text-slate-400 mt-1 font-mono break-all">{surveyUrl}</p>
         </div>
 
-        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-          <button
+        {/* ── Actions ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+
+          {/* QR toggle */}
+          <motion.button
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
             onClick={() => setShowQR(v => !v)}
-            title="QR-код"
-            className={`flex items-center gap-1.5 text-sm border px-3 py-1.5 rounded-lg transition-colors font-medium ${
-              showQR
-                ? 'border-indigo-300 bg-indigo-50 text-indigo-600'
-                : 'bg-white border-[#E8ECF0] text-slate-600 hover:bg-slate-50'
-            }`}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 100, cursor: 'pointer',
+              border: '1px solid rgba(91,91,214,0.2)',
+              transition: 'all 0.15s',
+              ...(showQR
+                ? { background: 'rgba(91,91,214,0.12)', color: '#5B5BD6' }
+                : { background: 'rgba(255,255,255,0.8)', color: '#5B5BD6' }),
+            }}
           >
-            <QrCode className="w-3.5 h-3.5" />
-            QR
-          </button>
-          <button
+            <QrCode size={14} /> QR
+          </motion.button>
+
+          {/* Copy */}
+          <motion.button
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
             onClick={copyLink}
-            className="flex items-center gap-1.5 bg-white border border-[#E8ECF0] text-slate-600 hover:bg-slate-50 text-sm px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap font-medium"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 100, cursor: 'pointer',
+              background: 'rgba(255,255,255,0.8)', color: '#5B5BD6',
+              border: '1px solid rgba(91,91,214,0.2)',
+              whiteSpace: 'nowrap',
+            }}
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-            {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
-          </button>
-          <Link
-            href={`/dashboard/surveys/${survey.id}`}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors"
-          >
-            Результаты
-          </Link>
+            {copied
+              ? <><Check size={14} color="#059669" />Скопировано!</>
+              : <><Share2 size={14} />Поделиться</>}
+          </motion.button>
+
+          {/* Results CTA */}
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+            <Link
+              href={`/dashboard/surveys/${survey.id}`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 13, fontWeight: 600, padding: '8px 20px', borderRadius: 100,
+                background: 'linear-gradient(135deg, #5B5BD6, #7C4DDB)',
+                color: '#fff', textDecoration: 'none', border: 'none',
+                boxShadow: '0 4px 16px rgba(91,91,214,0.35)',
+              }}
+            >
+              Результаты <ArrowRight size={13} />
+            </Link>
+          </motion.div>
         </div>
       </div>
 
-      {showQR && (
-        <div className="mt-4 pt-4 border-t border-[#E8ECF0] flex items-start gap-6">
-          <div className="p-3 bg-white border border-[#E8ECF0] rounded-xl inline-block">
-            <QRCode id={`qr-${survey.code}`} value={surveyUrl} size={140} />
-          </div>
-          <div className="text-sm text-slate-500 pt-1">
-            <p className="font-medium text-slate-700 mb-1">QR-код для опроса</p>
-            <p className="text-xs leading-relaxed mb-3">Распечатайте или разместите этот QR-код, чтобы сотрудники могли легко пройти опрос с телефона.</p>
-            <button
-              onClick={downloadQR}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Скачать QR с описанием
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* ── QR panel ── */}
+      <AnimatePresence>
+        {showQR && (
+          <motion.div
+            key="qr"
+            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginTop: 20 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.8)',
+              display: 'flex', alignItems: 'flex-start', gap: 20,
+            }}>
+              <div style={{
+                padding: 10, background: 'rgba(255,255,255,0.9)', borderRadius: 14,
+                border: '1px solid rgba(255,255,255,0.9)', flexShrink: 0,
+                boxShadow: '0 4px 16px rgba(100,80,200,0.08)',
+              }}>
+                <QRCode id={`qr-${survey.code}`} value={surveyUrl} size={130} />
+              </div>
+              <div style={{ paddingTop: 4 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 6 }}>
+                  QR-код для опроса
+                </p>
+                <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, marginBottom: 16 }}>
+                  Распечатайте или разместите этот QR-код — сотрудники смогут пройти опрос с телефона за 3–5 минут.
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  onClick={downloadQR}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 100,
+                    background: 'linear-gradient(135deg, #5B5BD6, #7C4DDB)',
+                    color: '#fff', border: 'none', cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(91,91,214,0.3)',
+                  }}
+                >
+                  <Download size={14} /> Скачать QR с описанием
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
