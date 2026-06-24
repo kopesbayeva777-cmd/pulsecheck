@@ -139,7 +139,7 @@ export default function NewSurveyPage() {
     }
 
     return (
-      <div className="max-w-lg">
+      <div className="max-w-2xl">
         <div className="mb-8">
           <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 text-sm">
             ← Назад
@@ -163,7 +163,10 @@ export default function NewSurveyPage() {
 
           {/* Инструкция */}
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3 text-sm">
-            <p className="font-semibold text-emerald-600">✅ Опрос готов к запуску!</p>
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+              <span className="font-semibold text-slate-900">Опрос готов к запуску!</span>
+            </div>
 
             <div>
               <p className="font-medium text-slate-800 mb-1">Как поделиться с сотрудниками:</p>
