@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import QRCode from 'react-qr-code'
-import { CheckCircle, ClipboardList } from 'lucide-react'
+import { CheckCircle, ClipboardList, Share2, Check, Download } from 'lucide-react'
 
 const INDUSTRIES = [
   'IT и технологии',
@@ -32,6 +32,15 @@ interface CreatedSurvey {
   code: string
 }
 
+const BTN: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 100, cursor: 'pointer',
+  background: 'rgba(255,255,255,0.7)',
+  border: '1px solid rgba(0,0,0,0.08)',
+  color: '#111827',
+  transition: 'background 0.15s',
+}
+
 export default function NewSurveyPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
@@ -39,6 +48,7 @@ export default function NewSurveyPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [created, setCreated] = useState<CreatedSurvey | null>(null)
+  const [copied, setCopied] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -89,6 +99,45 @@ export default function NewSurveyPage() {
       : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
     const surveyUrl = `${origin}/survey/${created.code}`
 
+    const copyLink = async () => {
+      const text = `PulseCheck — анонимный опрос команды\n\nПожалуйста, пройдите короткий опрос — это займёт 3–5 минут. Ваши ответы анонимны и помогут улучшить работу команды.\n\nСсылка на опрос:\n${surveyUrl}`
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    const downloadQR = () => {
+      const svg = document.getElementById('new-survey-qr')
+      if (!svg) return
+      const canvas = document.createElement('canvas')
+      const size = 400
+      canvas.width = size
+      canvas.height = size + 140
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      const code = created!.code
+      const svgData = new XMLSerializer().serializeToString(svg)
+      const img = new Image()
+      img.onload = () => {
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(img, 0, 0, size, size)
+        ctx.fillStyle = '#111827'; ctx.font = 'bold 18px Inter, Arial'; ctx.textAlign = 'center'
+        ctx.fillText('PulseCheck — анонимный опрос команды', size / 2, size + 30)
+        ctx.fillStyle = '#6B7280'; ctx.font = '13px Inter, Arial'
+        ctx.fillText('Пройдите короткий опрос — это займёт 3–5 минут.', size / 2, size + 55)
+        ctx.fillText('Ваши ответы анонимны и помогут улучшить', size / 2, size + 75)
+        ctx.fillText('работу команды.', size / 2, size + 95)
+        ctx.fillStyle = '#5B5BD6'; ctx.font = '12px Inter, Arial'
+        ctx.fillText(surveyUrl, size / 2, size + 125)
+        const link = document.createElement('a')
+        link.download = `qr-опрос-${code}.png`
+        link.href = canvas.toDataURL()
+        link.click()
+      }
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+    }
+
     return (
       <div className="max-w-lg">
         <div className="mb-8">
@@ -115,11 +164,33 @@ export default function NewSurveyPage() {
           <div className="flex flex-col items-center gap-3 pt-2">
             <p className="text-xs text-slate-500 font-medium self-start">QR-код для распечатки</p>
             <div className="p-4 bg-white border border-[#E8ECF0] rounded-xl inline-block">
-              <QRCode value={surveyUrl} size={160} />
+              <QRCode id="new-survey-qr" value={surveyUrl} size={160} />
             </div>
             <p className="text-xs text-slate-400 text-center leading-relaxed">
               Разместите QR-код в офисе или отправьте сотрудникам — они смогут пройти опрос с телефона
             </p>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
+              <button
+                onClick={copyLink}
+                style={BTN}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
+              >
+                {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
+                {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
+              </button>
+              <button
+                onClick={downloadQR}
+                style={BTN}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
+              >
+                <Download size={14} />
+                Скачать QR с описанием
+              </button>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">
