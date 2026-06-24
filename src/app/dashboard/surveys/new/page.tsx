@@ -156,34 +156,56 @@ export default function NewSurveyPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-3 pt-2">
-            <div className="p-4 bg-white border border-[#E8ECF0] rounded-xl inline-block">
-              <QRCode id="new-survey-qr" value={surveyUrl} size={160} />
-            </div>
-            <p className="text-xs text-slate-400 text-center leading-relaxed">
-              Разместите QR-код в офисе или отправьте сотрудникам — они смогут пройти опрос с телефона
-            </p>
+          {/* Скрытый QR для скачивания */}
+          <div style={{ position: 'absolute', left: -9999, top: -9999 }}>
+            <QRCode id="new-survey-qr" value={surveyUrl} size={400} />
+          </div>
 
-            {/* Action buttons */}
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
-              <button
-                onClick={copyLink}
-                style={BTN}
-                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
-                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
-              >
-                {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
-                {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
-              </button>
-              <button
-                onClick={downloadQR}
-                style={BTN}
-                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
-                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
-              >
-                <Download size={14} />
-                Скачать QR с описанием
-              </button>
+          {/* Инструкция */}
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3 text-sm">
+            <p className="font-semibold text-emerald-600">✅ Опрос готов к запуску!</p>
+
+            <div>
+              <p className="font-medium text-slate-800 mb-1">Как поделиться с сотрудниками:</p>
+              <ul className="text-slate-600 space-y-1 text-xs">
+                <li>• Отправьте ссылку через мессенджер — кнопка «Поделиться ссылкой»</li>
+                <li>• Или распечатайте QR-код — кнопка «Скачать QR с описанием»</li>
+              </ul>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                <button
+                  onClick={copyLink}
+                  style={BTN}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
+                >
+                  {copied ? <Check size={14} color="#059669" /> : <Share2 size={14} />}
+                  {copied ? 'Скопировано!' : 'Поделиться ссылкой на опрос'}
+                </button>
+                <button
+                  onClick={downloadQR}
+                  style={BTN}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.95)')}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.7)')}
+                >
+                  <Download size={14} />
+                  Скачать QR с описанием
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p className="font-medium text-slate-800 mb-1">Как провести опрос:</p>
+              <ul className="text-slate-600 space-y-1 text-xs">
+                <li>• Рекомендуем установить дедлайн и заранее предупредить команду</li>
+                <li>• После сбора ответов закройте опрос в настройках — получите результаты и проанализируйте данные с помощью ИИ</li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-medium text-slate-800 mb-1">Достоверность ответов:</p>
+              <ul className="text-slate-600 space-y-1 text-xs">
+                <li>• Система ограничивает одно прохождение опроса с одного устройства раз в 24 часа</li>
+              </ul>
             </div>
           </div>
 
