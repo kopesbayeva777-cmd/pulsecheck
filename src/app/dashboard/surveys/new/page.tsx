@@ -156,13 +156,7 @@ export default function NewSurveyPage() {
             </div>
           </div>
 
-          <div className="bg-[#F8F9FB] border border-[#E8ECF0] rounded-xl p-4">
-            <p className="text-xs font-medium text-slate-500 mb-1">Ссылка для сотрудников</p>
-            <p className="text-sm font-mono text-indigo-600 break-all">{surveyUrl}</p>
-          </div>
-
           <div className="flex flex-col items-center gap-3 pt-2">
-            <p className="text-xs text-slate-500 font-medium self-start">QR-код для распечатки</p>
             <div className="p-4 bg-white border border-[#E8ECF0] rounded-xl inline-block">
               <QRCode id="new-survey-qr" value={surveyUrl} size={160} />
             </div>
